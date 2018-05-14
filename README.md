@@ -1,0 +1,2 @@
+# Bahamut
+Discord bot tries
