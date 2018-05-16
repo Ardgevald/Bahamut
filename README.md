@@ -1,8 +1,11 @@
 # Bahamut
 Discord bot try
 
-Needs a token.js file containing the discord bot token. For instance :
+Needs a config.json file containing the bot configuration:
 
-```js
-module.exports.token = 'my token here'
+```json
+{
+  "prefix": "!",
+  "token": "My token here"
+}
 ```
