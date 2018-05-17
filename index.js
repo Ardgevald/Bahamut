@@ -8,7 +8,10 @@ const Discord = require('discord.js');
 const client = new Discord.Client();
 client.commands = new Discord.Collection();
 
+const cooldowns = new Discord.Collection();
+
 fs.readdirSync('./commands').forEach((file) => {
+  // eslint-disable-line global-require no-dynamic-require
   const command = require(`./commands/${file}`);
   client.commands.set(command.name, command);
 });
@@ -25,13 +28,49 @@ client.on('message', (message) => {
   const args = message.content.slice(prefix.length).split(/ +/);
   const commandName = args.shift().toLowerCase();
 
-  if (!client.commands.has(commandName)) return;
+  const command = client.commands.get(commandName)
+    || client.commands.find(cmd => cmd.aliases && cmd.aliases.includes(commandName));
 
-  const command = client.commands.get(commandName);
+  if (!command) return;
+
+  if (command.guildOnly && message.channel.type !== 'text') {
+    message.reply('I can\'t execute that command inside DMs!');
+    return;
+  }
 
   if (command.args && !args.length) {
-    message.channel.send(`You didn't provide any arguments, ${message.author}!`);
+    let reply = `You didn't provide any arguments, ${message.author}!`;
+
+    if (command.usage) {
+      reply += `\nUsage :${command.usage}`;
+    }
+
+    message.channel.send(reply);
     return;
+  }
+
+  if (!cooldowns.has(command.name)) {
+    cooldowns.set(command.name, new Discord.Collection());
+  }
+
+  const now = Date.now();
+  const timestamps = cooldowns.get(command.name);
+  const cooldownAmount = (command.cooldown || 3) * 1000;
+
+  if (!timestamps.has(message.author.id)) {
+    timestamps.set(message.author.id, now);
+    setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
+  } else {
+    const expirationTime = timestamps.get(message.author.id) + cooldownAmount;
+
+    if (now < expirationTime) {
+      const timeLeft = (expirationTime - now) / 1000;
+      message.reply(`please wait ${timeLeft.toFixed(1)} more second(s) before reusing the \`${command.name}\` command.`);
+      return;
+    }
+
+    timestamps.set(message.author.id, now);
+    setTimeout(() => timestamps.delete(message.author.id), cooldownAmount);
   }
 
   try {

@@ -1,6 +1,7 @@
 module.exports = {
   args: true,
   name: 'args-info',
+  aliases: ['args', 'argsinfo'],
   description: 'Information about the arguments provided.',
   execute(message, args) {
     if (args[0] === 'foo') {
