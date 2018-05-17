@@ -42,7 +42,7 @@ client.on('message', (message) => {
     let reply = `You didn't provide any arguments, ${message.author}!`;
 
     if (command.usage) {
-      reply += `\nUsage :${command.usage}`;
+      reply += `\`\`\`\nUsage:\n${command.usage}\`\`\``;
     }
 
     message.channel.send(reply);

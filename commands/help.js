@@ -3,7 +3,7 @@ const { prefix } = require('../config.json');
 module.exports = {
   name: 'help',
   description: 'List all of my commands or info about a specific command.',
-  aliases: ['command', 'commands'],
+  aliases: ['command', 'commands', '?', 'h'],
   usage: '<command name>',
   cooldown: 5,
   execute(message, args) {
@@ -16,7 +16,8 @@ module.exports = {
       data.push(`\nYou can send \`${prefix}help <command name>\` to get info on a specific command!`);
     } else {
       if (!commands.has(args[0])) {
-        return message.reply('that\'s not a valid command!');
+        message.reply('that\'s not a valid command!');
+        return;
       }
 
       const command = commands.get(args[0]);
@@ -26,8 +27,6 @@ module.exports = {
       if (command.description) data.push(`Description: ${command.description}`);
       if (command.aliases) data.push(`Aliases:     ${command.aliases.join(', ')}`);
       data.push(`Cooldown:    ${command.cooldown || 3} second(s)`);
-      
-      
       if (command.usage) data.push(`Usage:\n\n${prefix}${command.name} ${command.usage}`);
     }
 
